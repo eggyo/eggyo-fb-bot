@@ -216,6 +216,7 @@ function receivedMessage(event) {
       messageId, quickReplyPayload);
 
     sendTextMessage(senderID, "You choose answer : "+quickReplyPayload);
+    console.log("Quick reply for metadata %s ",metadata);
     if (metadata == quickReplyPayload) {
       sendTextMessage(senderID, "You choose correct answer");
     }else {
