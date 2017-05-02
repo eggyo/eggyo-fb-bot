@@ -212,13 +212,12 @@ function receivedMessage(event) {
     return;
   } else if (quickReply) {
     var quickReplyPayload = quickReply.payload;
-    var quickReplyTitle = quickReply.title;
 
-    console.log("Quick reply for message %s with payload %s and title %s",
-      messageId, quickReplyPayload,quickReplyTitle);
+    console.log("Quick reply for message %s with payload %s and quickReply %s",
+      messageId, quickReplyPayload,quickReply);
 
     sendTextMessage(senderID, "You choose answer : "+quickReplyPayload);
-    if (quickReplyTitle == quickReplyPayload) {
+    if (messageText == quickReplyPayload) {
       sendTextMessage(senderID, "You choose correct answer");
     }else {
       sendTextMessage(senderID, "You choose wrong answer");
