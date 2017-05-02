@@ -212,12 +212,13 @@ function receivedMessage(event) {
     return;
   } else if (quickReply) {
     var quickReplyPayload = quickReply.payload;
-    console.log("Quick reply for message %s with payload %s",
-      messageId, quickReplyPayload);
+    var quickReplyTitle = quickReply.title;
+
+    console.log("Quick reply for message %s with payload %s and title %s",
+      messageId, quickReplyPayload,quickReplyTitle);
 
     sendTextMessage(senderID, "You choose answer : "+quickReplyPayload);
-    console.log("Quick reply for metadata %s ",metadata);
-    if (metadata == quickReplyPayload) {
+    if (quickReplyTitle == quickReplyPayload) {
       sendTextMessage(senderID, "You choose correct answer");
     }else {
       sendTextMessage(senderID, "You choose wrong answer");
@@ -762,16 +763,16 @@ function sendQuiz(recipientId,quizMessage,correctAnswer) {
 var messageMetaData;
 switch (correctAnswer) {
   case 1:
-    messageMetaData = "ANSWER_PAYLOAD_1";
+    messageMetaData = "1";
     break;
   case 2:
-    messageMetaData = "ANSWER_PAYLOAD_2";
+    messageMetaData = "2";
     break;
   case 3:
-    messageMetaData = "ANSWER_PAYLOAD_3";
+    messageMetaData = "3";
     break;
   case 4:
-    messageMetaData = "ANSWER_PAYLOAD_4";
+    messageMetaData = "4";
     break;
   default:
 
@@ -787,22 +788,22 @@ switch (correctAnswer) {
         {
           "content_type":"text",
           "title":"1",
-          "payload":"ANSWER_PAYLOAD_1"
+          "payload":messageMetaData
         },
         {
           "content_type":"text",
           "title":"2",
-          "payload":"ANSWER_PAYLOAD_2"
+          "payload":messageMetaData
         },
         {
           "content_type":"text",
           "title":"3",
-          "payload":"ANSWER_PAYLOAD_3"
+          "payload":messageMetaData
         },
         {
           "content_type":"text",
           "title":"4",
-          "payload":"ANSWER_PAYLOAD_4"
+          "payload":messageMetaData
         }
       ]
     }
