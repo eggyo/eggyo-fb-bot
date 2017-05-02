@@ -215,7 +215,12 @@ function receivedMessage(event) {
     console.log("Quick reply for message %s with payload %s",
       messageId, quickReplyPayload);
 
-    sendTextMessage(senderID, "Quick reply tapped");
+    sendTextMessage(senderID, "You choose answer : "+quickReplyPayload);
+    if (metadata == quickReplyPayload) {
+      sendTextMessage(senderID, "You choose correct answer");
+    }else {
+      sendTextMessage(senderID, "You choose wrong answer");
+    }
     return;
   }
 
@@ -278,15 +283,19 @@ function receivedMessage(event) {
           sendTextMessage(senderID, response);
         });
         break
-        
+
       case '#help':
         sendHelpTips(senderID);
         break
-        
+
       case '#menu':
         sendMenu(senderID);
         break
-        
+
+      case '#quiz':
+        sendQuiz(senderID,"test quiz message",2);
+        break
+
       default:
       processMessage(messageText,function(responseMsg){
         if(responseMsg == messageText){
@@ -746,6 +755,62 @@ function sendTypingOff(recipientId) {
   callSendAPI(messageData);
 }
 /*
+* send quiz
+*/
+function sendQuiz(recipientId,quizMessage,correctAnswer) {
+var messageMetaData;
+switch (correctAnswer) {
+  case 1:
+    messageMetaData = "ANSWER_PAYLOAD_1";
+    break;
+  case 2:
+    messageMetaData = "ANSWER_PAYLOAD_2";
+    break;
+  case 3:
+    messageMetaData = "ANSWER_PAYLOAD_3";
+    break;
+  case 4:
+    messageMetaData = "ANSWER_PAYLOAD_4";
+    break;
+  default:
+
+}
+  var messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      text: quizMessage,
+      metadata: messageMetaData,
+      quick_replies: [
+        {
+          "content_type":"text",
+          "title":"1",
+          "payload":"ANSWER_PAYLOAD_1"
+        },
+        {
+          "content_type":"text",
+          "title":"2",
+          "payload":"ANSWER_PAYLOAD_2"
+        },
+        {
+          "content_type":"text",
+          "title":"3",
+          "payload":"ANSWER_PAYLOAD_3"
+        },
+        {
+          "content_type":"text",
+          "title":"4",
+          "payload":"ANSWER_PAYLOAD_4"
+        }
+      ]
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+/*
  * Call the Send API. The message data goes in the body. If successful, we'll
  * get the message id in a response
  *
@@ -824,7 +889,7 @@ function sendHelpTips(recipientId) {
           "content_type":"text",
           "title":"ส่งข้อความ",
           "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-        
+
         }
       ]
     }
@@ -899,9 +964,7 @@ function trainingCommand(msg,res) {
   msg = msg.replace(" #ans ",":");
   var msgs = msg.split(":");
   var replyDatas = msgs[1].split(",");
-   console.log(replyDatas);
-   replyDatas = JSON.stringify(replyDatas);
-   console.log(replyDatas);
+  replyDatas = JSON.stringify(replyDatas);
   var data = '{"msg":"'+msgs[0]+'","replyMsg":'+replyDatas+'}';
   callParseServerCloudCode("botTraining",data,function(response){
     console.log(response);

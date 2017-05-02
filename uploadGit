@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /Users/copperwired/documents/heroku/eggyo-facebook-bot
+
+git add * -f
+git commit -am "v.1"
+git push origin master
