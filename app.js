@@ -81,6 +81,8 @@ app.post('/webhook', function (req, res) {
   if (data.object == 'page') {
     // Iterate over each entry
     // There may be multiple if batched
+    console.log("data: ", JSON.stringify(data));
+
     data.entry.forEach(function(pageEntry) {
       var pageID = pageEntry.id;
       var timeOfEvent = pageEntry.time;
@@ -872,6 +874,7 @@ function callParseServerCloudCode(methodName,requestMsg,responseMsg) {
   }
   request(options, callback);
 }
+
 function sendHelpTips(recipientId) {
   var messageData = {
     recipient: {
