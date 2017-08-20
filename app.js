@@ -88,21 +88,25 @@ app.post('/webhook', function (req, res) {
       var timeOfEvent = pageEntry.time;
 
       // Iterate over each messaging event
-      pageEntry.messaging.forEach(function(messagingEvent) {
-        if (messagingEvent.optin) {
-          receivedAuthentication(messagingEvent);
-        } else if (messagingEvent.message) {
-          receivedMessage(messagingEvent);
-        } else if (messagingEvent.delivery) {
-          receivedDeliveryConfirmation(messagingEvent);
-        } else if (messagingEvent.postback) {
-          receivedPostback(messagingEvent);
-        } else if (messagingEvent.read) {
-          receivedMessageRead(messagingEvent);
-        } else {
-          console.log("Webhook received unknown messagingEvent: ", messagingEvent);
-        }
-      });
+      if (pageEntry.messaging != null) {
+        pageEntry.messaging.forEach(function(messagingEvent) {
+          if (messagingEvent.optin) {
+            receivedAuthentication(messagingEvent);
+          } else if (messagingEvent.message) {
+            receivedMessage(messagingEvent);
+          } else if (messagingEvent.delivery) {
+            receivedDeliveryConfirmation(messagingEvent);
+          } else if (messagingEvent.postback) {
+            receivedPostback(messagingEvent);
+          } else if (messagingEvent.read) {
+            receivedMessageRead(messagingEvent);
+          } else {
+            console.log("Webhook received unknown messagingEvent: ", messagingEvent);
+          }
+        });
+      }
+
+
     });
 
     // Assume all went well.
