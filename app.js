@@ -21,7 +21,9 @@ const
 var app = express();
 
 app.set('port', process.env.PORT || 5000);
-app.use(bodyParser.json({ verify: verifyRequestSignature }));
+app.use(bodyParser.json({
+  verify: verifyRequestSignature
+}));
 app.use(express.static('public'));
 
 /*
@@ -57,7 +59,7 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN)) {
  */
 app.get('/webhook', function(req, res) {
   if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === VALIDATION_TOKEN) {
+    req.query['hub.verify_token'] === VALIDATION_TOKEN) {
     console.log("Validating webhook");
     res.status(200).send(req.query['hub.challenge']);
   } else {
@@ -74,7 +76,7 @@ app.get('/webhook', function(req, res) {
  * https://developers.facebook.com/docs/messenger-platform/product-overview/setup#subscribe_app
  *
  */
-app.post('/webhook', function (req, res) {
+app.post('/webhook', function(req, res) {
   var data = req.body;
 
   // Make sure this is a page subscription
@@ -88,7 +90,7 @@ app.post('/webhook', function (req, res) {
       var timeOfEvent = pageEntry.time;
 
       // Iterate over each messaging event
-      if (pageEntry.messaging != null) {
+      if (pageEntry.messaging) {
         pageEntry.messaging.forEach(function(messagingEvent) {
           if (messagingEvent.optin) {
             receivedAuthentication(messagingEvent);
@@ -104,8 +106,16 @@ app.post('/webhook', function (req, res) {
             console.log("Webhook received unknown messagingEvent: ", messagingEvent);
           }
         });
+      } else if (pageEntry.changes) {
+        pageEntry.changes.forEach(function(changesEvent) {
+          if (changesEvent.value.item == "comment" && changesEvent.value.item.message) {
+            console.log(changesEvent.value.item.sender_name + "--> comment : " + changesEvent.value.item.message);
+            sendTextMessage(changesEvent.value.item.sender_id, "ตามที่คุณ" + changesEvent.value.item.sender_name +
+            "สอบถามว่า " + changesEvent.value.item.message + " นะคะ");
+            sendTextMessage(changesEvent.value.item.sender_id, "รายละเอียดตามนี้เลย ............");
+          }
+        });
       }
-
 
     });
 
@@ -138,8 +148,8 @@ function verifyRequestSignature(req, res, buf) {
     var signatureHash = elements[1];
 
     var expectedHash = crypto.createHmac('sha1', APP_SECRET)
-                        .update(buf)
-                        .digest('hex');
+      .update(buf)
+      .digest('hex');
 
     if (signatureHash != expectedHash) {
       throw new Error("Couldn't validate the request signature.");
@@ -220,12 +230,12 @@ function receivedMessage(event) {
     var quickReplyPayload = quickReply.payload;
 
     console.log("Quick reply for message %s with payload %s and quickReply %s",
-      messageId, quickReplyPayload,quickReply);
+      messageId, quickReplyPayload, quickReply);
 
-    sendTextMessage(senderID, "You choose answer : "+quickReplyPayload);
+    sendTextMessage(senderID, "You choose answer : " + quickReplyPayload);
     if (messageText == quickReplyPayload) {
       sendTextMessage(senderID, "You choose correct answer");
-    }else {
+    } else {
       sendTextMessage(senderID, "You choose wrong answer");
     }
     return;
@@ -286,7 +296,7 @@ function receivedMessage(event) {
         break
 
       case 'test':
-        callParseServerCloudCode("testMsg",'{"msg":"fuck"}',function(response){
+        callParseServerCloudCode("testMsg", '{"msg":"fuck"}', function(response) {
           sendTextMessage(senderID, response);
         });
         break
@@ -300,24 +310,24 @@ function receivedMessage(event) {
         break
 
       case '#quiz':
-        sendQuiz(senderID,"test quiz message",2);
+        sendQuiz(senderID, "test quiz message", 2);
         break
 
       default:
-      processMessage(messageText,function(responseMsg){
-        if(responseMsg == messageText){
-          callParseServerCloudCode("getReplyMsg",'{"msg":"'+messageText+'"}',function(response){
-            if (response == "") {
-              console.log("no msg reply");
-              sendTextMessage(senderID, "ข้าไม่เข้าใจที่เจ้าพูด");
-            }else {
-              sendTextMessage(senderID, response);
-            }
-          });
-        }else {
-          sendTextMessage(senderID, responseMsg);
-        }
-      });
+        processMessage(messageText, function(responseMsg) {
+          if (responseMsg == messageText) {
+            callParseServerCloudCode("getReplyMsg", '{"msg":"' + messageText + '"}', function(response) {
+              if (response == "") {
+                console.log("no msg reply");
+                sendTextMessage(senderID, "ข้าไม่เข้าใจที่เจ้าพูด");
+              } else {
+                sendTextMessage(senderID, response);
+              }
+            });
+          } else {
+            sendTextMessage(senderID, responseMsg);
+          }
+        });
 
     }
   } else if (messageAttachments) {
@@ -538,7 +548,7 @@ function sendButtonMessage(recipientId) {
         payload: {
           template_type: "button",
           text: "This is test text",
-          buttons:[{
+          buttons: [{
             type: "web_url",
             url: "https://www.oculus.com/en-us/rift/",
             title: "Open Web URL"
@@ -616,13 +626,13 @@ function sendGenericMessage(recipientId) {
  */
 function sendReceiptMessage(recipientId) {
   // Generate a random receipt ID as the API requires a unique ID
-  var receiptId = "order" + Math.floor(Math.random()*1000);
+  var receiptId = "order" + Math.floor(Math.random() * 1000);
 
   var messageData = {
     recipient: {
       id: recipientId
     },
-    message:{
+    message: {
       attachment: {
         type: "template",
         payload: {
@@ -688,21 +698,20 @@ function sendQuickReply(recipientId) {
     message: {
       text: "What's your favorite movie genre?",
       metadata: "DEVELOPER_DEFINED_METADATA",
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"Action",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
+      quick_replies: [{
+          "content_type": "text",
+          "title": "Action",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
         },
         {
-          "content_type":"text",
-          "title":"Comedy",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
+          "content_type": "text",
+          "title": "Comedy",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
         },
         {
-          "content_type":"text",
-          "title":"Drama",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
+          "content_type": "text",
+          "title": "Drama",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
         }
       ]
     }
@@ -762,26 +771,26 @@ function sendTypingOff(recipientId) {
   callSendAPI(messageData);
 }
 /*
-* send quiz
-*/
-function sendQuiz(recipientId,quizMessage,correctAnswer) {
-var messageMetaData;
-switch (correctAnswer) {
-  case 1:
-    messageMetaData = "1";
-    break;
-  case 2:
-    messageMetaData = "2";
-    break;
-  case 3:
-    messageMetaData = "3";
-    break;
-  case 4:
-    messageMetaData = "4";
-    break;
-  default:
+ * send quiz
+ */
+function sendQuiz(recipientId, quizMessage, correctAnswer) {
+  var messageMetaData;
+  switch (correctAnswer) {
+    case 1:
+      messageMetaData = "1";
+      break;
+    case 2:
+      messageMetaData = "2";
+      break;
+    case 3:
+      messageMetaData = "3";
+      break;
+    case 4:
+      messageMetaData = "4";
+      break;
+    default:
 
-}
+  }
   var messageData = {
     recipient: {
       id: recipientId
@@ -789,26 +798,25 @@ switch (correctAnswer) {
     message: {
       text: quizMessage,
       metadata: messageMetaData,
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"1",
-          "payload":messageMetaData
+      quick_replies: [{
+          "content_type": "text",
+          "title": "1",
+          "payload": messageMetaData
         },
         {
-          "content_type":"text",
-          "title":"2",
-          "payload":messageMetaData
+          "content_type": "text",
+          "title": "2",
+          "payload": messageMetaData
         },
         {
-          "content_type":"text",
-          "title":"3",
-          "payload":messageMetaData
+          "content_type": "text",
+          "title": "3",
+          "payload": messageMetaData
         },
         {
-          "content_type":"text",
-          "title":"4",
-          "payload":messageMetaData
+          "content_type": "text",
+          "title": "4",
+          "payload": messageMetaData
         }
       ]
     }
@@ -825,11 +833,13 @@ switch (correctAnswer) {
 function callSendAPI(messageData) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: {
+      access_token: PAGE_ACCESS_TOKEN
+    },
     method: 'POST',
     json: messageData
 
-  }, function (error, response, body) {
+  }, function(error, response, body) {
     if (!error && response.statusCode == 200) {
       var recipientId = body.recipient_id;
       var messageId = body.message_id;
@@ -838,13 +848,13 @@ function callSendAPI(messageData) {
         console.log("Successfully sent message with id %s to recipient %s",
           messageId, recipientId);
       } else {
-      console.log("Successfully called Send API for recipient %s",
-        recipientId);
+        console.log("Successfully called Send API for recipient %s",
+          recipientId);
       }
     } else {
-    //  var errorMessage = response.error.message;
-    //  var errorCode = response.error.code;
-      console.error("Unable to send message. Error %d: %s",error);
+      //  var errorMessage = response.error.message;
+      //  var errorCode = response.error.code;
+      console.error("Unable to send message. Error %d: %s", error);
     }
   });
 }
@@ -854,26 +864,27 @@ function callSendAPI(messageData) {
  * cloud code from parse server
  *
  */
-function callParseServerCloudCode(methodName,requestMsg,responseMsg) {
-  console.log("callParseServerCloudCode:"+methodName+"\nrequestMsg:"+requestMsg);
+function callParseServerCloudCode(methodName, requestMsg, responseMsg) {
+  console.log("callParseServerCloudCode:" + methodName + "\nrequestMsg:" + requestMsg);
   var options = {
-  url: 'https://reply-msg-parse-server.herokuapp.com/parse/functions/'+methodName,
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Parse-Application-Id' : 'myAppId',
-    'X-Parse-REST-API-Key': 'myRestKey'
-  },
-  body: requestMsg
+    url: 'https://reply-msg-parse-server.herokuapp.com/parse/functions/' + methodName,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Parse-Application-Id': 'myAppId',
+      'X-Parse-REST-API-Key': 'myRestKey'
+    },
+    body: requestMsg
   };
+
   function callback(error, response, body) {
-    console.log("response:"+JSON.stringify(response));
+    console.log("response:" + JSON.stringify(response));
     if (!error && response.statusCode == 200) {
-    var info = JSON.parse(body);
-    responseMsg(info.result.replyMsg);
-    console.log("result.msg: "+info.result.msg+" result.replyMsg: "+info.result.replyMsg);
-    }else {
-    console.error("Unable to send message. Error :"+error);
+      var info = JSON.parse(body);
+      responseMsg(info.result.replyMsg);
+      console.log("result.msg: " + info.result.msg + " result.replyMsg: " + info.result.replyMsg);
+    } else {
+      console.error("Unable to send message. Error :" + error);
     }
   }
   request(options, callback);
@@ -887,16 +898,15 @@ function sendHelpTips(recipientId) {
     message: {
       text: "อยากรู้วิธีสั่งข้ารึ จะให้ข้าทำอะไร?",
       metadata: "DEVELOPER_DEFINED_METADATA",
-      quick_replies: [
-        {
-          "content_type":"text",
-          "title":"สอนข้า",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
+      quick_replies: [{
+          "content_type": "text",
+          "title": "สอนข้า",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
         },
         {
-          "content_type":"text",
-          "title":"ส่งข้อความ",
-          "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
+          "content_type": "text",
+          "title": "ส่งข้อความ",
+          "payload": "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
 
         }
       ]
@@ -905,6 +915,7 @@ function sendHelpTips(recipientId) {
 
   callSendAPI(messageData);
 }
+
 function sendMenu(recipientId) {
   var messageData = {
     recipient: {
@@ -916,7 +927,7 @@ function sendMenu(recipientId) {
         payload: {
           template_type: "button",
           text: "Menu",
-          buttons:[{
+          buttons: [{
             type: "web_url",
             url: "https://www.oculus.com/en-us/rift/",
             title: "Open Web URL"
@@ -937,21 +948,21 @@ function sendMenu(recipientId) {
   callSendAPI(messageData);
 }
 
-function processMessage(reqMsg,resMsg){
+function processMessage(reqMsg, resMsg) {
   if (reqMsg.length > 6) {
-    var checkMsg = reqMsg.substring(0,4);
+    var checkMsg = reqMsg.substring(0, 4);
     switch (checkMsg) {
       case '#ask':
-      // trainingCommand
-      trainingCommand(reqMsg,function(res){
-        if (!res) {
-          resMsg("ข้าว่ามีบางอย่างผิดพลาด ลองใหม่ซิ");
-          //failed
-        }else {
-          resMsg("ข้าจำได้แล้ว ลองทักข้าใหม่ซิ อิอิ");
-          //success
-        }
-      });
+        // trainingCommand
+        trainingCommand(reqMsg, function(res) {
+          if (!res) {
+            resMsg("ข้าว่ามีบางอย่างผิดพลาด ลองใหม่ซิ");
+            //failed
+          } else {
+            resMsg("ข้าจำได้แล้ว ลองทักข้าใหม่ซิ อิอิ");
+            //success
+          }
+        });
         break;
       case '#bot':
         // botCommand
@@ -960,35 +971,37 @@ function processMessage(reqMsg,resMsg){
         break;
 
       default:
-      resMsg(reqMsg);
+        resMsg(reqMsg);
     }
   } else {
-      // return original msg
-      resMsg(reqMsg);
+    // return original msg
+    resMsg(reqMsg);
   }
 }
-function trainingCommand(msg,res) {
-  msg = msg.replace("#ask ","");
-  msg = msg.replace(" #ans ",":");
+
+function trainingCommand(msg, res) {
+  msg = msg.replace("#ask ", "");
+  msg = msg.replace(" #ans ", ":");
   var msgs = msg.split(":");
   var replyDatas = msgs[1].split(",");
   replyDatas = JSON.stringify(replyDatas);
-  var data = '{"msg":"'+msgs[0]+'","replyMsg":'+replyDatas+'}';
-  callParseServerCloudCode("botTraining",data,function(response){
+  var data = '{"msg":"' + msgs[0] + '","replyMsg":' + replyDatas + '}';
+  callParseServerCloudCode("botTraining", data, function(response) {
     console.log(response);
     res(response);
   });
 }
-function isBotCommand(msg,res) {
-  if (msg.length > 6){
-    if (msg.substring(0,4) == "#bot") {
-  		res(true);
-  	} else {
+
+function isBotCommand(msg, res) {
+  if (msg.length > 6) {
+    if (msg.substring(0, 4) == "#bot") {
+      res(true);
+    } else {
       res(false);
-  	}
-	} else {
+    }
+  } else {
     res(false);
-	}
+  }
 }
 
 
