@@ -112,7 +112,7 @@ app.post('/webhook', function(req, res) {
         console.log("changes: ", JSON.stringify(pageEntry.changes));
 
         pageEntry.changes.forEach(function(changesEvent) {
-          if (changesEvent.value.item == "comment") {
+          if (changesEvent.value.item == "comment" && changesEvent.value.message) {
             console.log(changesEvent.value.sender_name + "--> comment : " + changesEvent.value.message);
             sendTextMessage(changesEvent.value.sender_id, "ตามที่คุณ" + changesEvent.value.sender_name +
             "สอบถามว่า " + changesEvent.value.message + " นะคะ");
@@ -836,7 +836,7 @@ function sendQuiz(recipientId, quizMessage, correctAnswer) {
  */
 function callSendAPI(messageData) {
   request({
-    uri: 'https://graph.facebook.com/v2.6/me/messages',
+    uri: 'https://graph.facebook.com/v2.10/me/messages',
     qs: {
       access_token: PAGE_ACCESS_TOKEN
     },
@@ -858,7 +858,7 @@ function callSendAPI(messageData) {
     } else {
       //  var errorMessage = response.error.message;
       //  var errorCode = response.error.code;
-      console.error("Unable to send message. Error %d: %s", error);
+      console.error("Unable to send message. Error :" + JSON.stringify(error));
     }
   });
 }
