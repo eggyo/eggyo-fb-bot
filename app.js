@@ -106,9 +106,11 @@ app.post('/webhook', function(req, res) {
             console.log("Webhook received unknown messagingEvent: ", messagingEvent);
           }
         });
-      } else if (pageEntry.changes) {
+      }
+
+      if (pageEntry.changes) {
         pageEntry.changes.forEach(function(changesEvent) {
-          if (changesEvent.value.item == "comment" && changesEvent.value.item.message) {
+          if (changesEvent.value.item == "comment") {
             console.log(changesEvent.value.item.sender_name + "--> comment : " + changesEvent.value.item.message);
             sendTextMessage(changesEvent.value.item.sender_id, "ตามที่คุณ" + changesEvent.value.item.sender_name +
             "สอบถามว่า " + changesEvent.value.item.message + " นะคะ");
