@@ -114,9 +114,7 @@ app.post('/webhook', function(req, res) {
         pageEntry.changes.forEach(function(changesEvent) {
           if (changesEvent.value.item == "comment" && changesEvent.value.message) {
             console.log(changesEvent.value.sender_name + "--> comment : " + changesEvent.value.message);
-            sendTextMessage(changesEvent.value.sender_id, "ตามที่คุณ" + changesEvent.value.sender_name +
-            "สอบถามว่า " + changesEvent.value.message + " นะคะ");
-            sendTextMessage(changesEvent.value.sender_id, "รายละเอียดตามนี้เลย ............");
+            callPrivateReplyAPI(changesEvent.value.comment_id, "รายละเอียดตามนี้เลย ............");
           }
         });
       }
@@ -863,6 +861,30 @@ function callSendAPI(messageData) {
   });
 }
 
+
+function callPrivateReplyAPI(commentId,message) {
+  request({
+    uri: 'https://graph.facebook.com/v2.10/' + commentId + '/private_replies',
+    qs: {
+      access_token: "EAADsma3b8o8BACZBboH0QqyJicCaoob9kzyF2KfsAPH7aSSZAM5S2DRGLSvg9kShQZBBJtp3p6JI7Y0RT6Lsi1vwLw4nPWyrI3TqZC9qtsqwGL6XiyHnYtDEXpXFCI6fqJwFO1tIsrVbKQdHhPwgNxhD77sBZC7TNvpZCi0xglZBQZDZD",
+      message : message
+    },
+    method: 'POST'
+  }, function(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var messageId = body.id;
+
+      if (messageId) {
+        console.log("Successfully sent message with id %s",
+          messageId);
+      }
+    } else {
+      //  var errorMessage = response.error.message;
+      //  var errorCode = response.error.code;
+      console.error("Unable to send message. Error :" + JSON.stringify(error));
+    }
+  });
+}
 
 /*
  * cloud code from parse server
