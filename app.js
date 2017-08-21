@@ -109,12 +109,14 @@ app.post('/webhook', function(req, res) {
       }
 
       if (pageEntry.changes) {
+        console.log("changes: ", JSON.stringify(pageEntry.changes));
+
         pageEntry.changes.forEach(function(changesEvent) {
           if (changesEvent.value.item == "comment") {
-            console.log(changesEvent.value.item.sender_name + "--> comment : " + changesEvent.value.item.message);
-            sendTextMessage(changesEvent.value.item.sender_id, "ตามที่คุณ" + changesEvent.value.item.sender_name +
-            "สอบถามว่า " + changesEvent.value.item.message + " นะคะ");
-            sendTextMessage(changesEvent.value.item.sender_id, "รายละเอียดตามนี้เลย ............");
+            console.log(changesEvent.value.sender_name + "--> comment : " + changesEvent.value.message);
+            sendTextMessage(changesEvent.value.sender_id, "ตามที่คุณ" + changesEvent.value.sender_name +
+            "สอบถามว่า " + changesEvent.value.message + " นะคะ");
+            sendTextMessage(changesEvent.value.sender_id, "รายละเอียดตามนี้เลย ............");
           }
         });
       }
