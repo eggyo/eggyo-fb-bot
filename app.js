@@ -114,8 +114,8 @@ app.post('/webhook', function(req, res) {
         pageEntry.changes.forEach(function(changesEvent) {
           if (changesEvent.value.item == "comment" && changesEvent.value.message) {
             console.log(changesEvent.value.sender_name + "--> comment : " + changesEvent.value.message);
-            callPrivateReplyAPI(changesEvent.value.comment_id, "ที่คุณลูกค้าสอบถาม รายละเอียดตามนี้เลยค่ะ ............");
-            callCommentsReplyAPI(changesEvent.value.comment_id, "Admin ทักไปทาง Inbox แล้วค่ะ");
+            //callPrivateReplyAPI(changesEvent.value.comment_id, "ที่คุณลูกค้าสอบถาม รายละเอียดตามนี้เลยค่ะ ............");
+            //callCommentsReplyAPI(changesEvent.value.comment_id, "Admin ทักไปทาง Inbox แล้วค่ะ");
           }
         });
       }
